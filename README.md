@@ -41,6 +41,35 @@ This skill summarizes what is discussed in the Claude Code session to a log. It 
 - Analyzes conversation automatically
 - Creates detailed log with decisions, action items
 - Saves to `.claude/memory/session-logs/`
+- Now supports Research Session template (auto-detects 3+ web searches)
+
+### `/research [topic]`
+
+Intelligent research skill that auto-detects scope and calls relevant C-level agents only when needed for big decisions.
+
+```
+/research can we do real-time audio in browser?
+```
+
+**Quick Mode** (5-15 min):
+- Single focused question, 1-3 searches
+- Present facts in digestible format
+- No agents called, user decides
+
+**Deep Mode** (30-60 min):
+- Multiple options, 5+ searches
+- Auto-invokes relevant C-level agents for verdict
+  - Architecture → CTO, Product Lead
+  - Strategy → CEO, Product Lead, CMO
+  - Cost → CFO, CTO
+  - Security → Security Officer, CTO
+- Comprehensive analysis with citations
+- Synthesized recommendation
+
+**Meta-Step** (when unclear):
+- Presents quick scope assessment
+- Asks: Quick or Deep research?
+- Clear format for easy decision
 
 ### `/plan [feature]`
 

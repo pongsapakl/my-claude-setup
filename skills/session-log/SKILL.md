@@ -20,8 +20,8 @@ Trigger when user says:
 
 1. **Detect project directory** - Use `pwd` to get current working directory
 2. **Analyze conversation** - Review full conversation history automatically
-3. **Determine type** - Implementation session (coding) or General session (planning/discussion)
-4. **Extract key info** - Summary, decisions, technical details, challenges, action items
+3. **Determine type** - Implementation (coding), Research (investigation), or General (planning/discussion)
+4. **Extract key info** - Summary, decisions, technical details, research findings, challenges, action items
 5. **Generate filename** - `YYYY-MM-DD-brief-topic.md` based on main topic
 6. **Save log** - Write to `{cwd}/.claude/memory/session-logs/` (project-local, not global)
 7. **Confirm** - Show summary to user
@@ -100,6 +100,91 @@ Use when session was planning, research, configuration, or discussion:
 ## Next Steps
 {What to do next}
 ```
+
+### Research Session
+
+Use when session involved web research, technical investigation, or feasibility analysis:
+
+```markdown
+# Research Session: {Topic} - {Date}
+
+## Research Question
+{What were we investigating?}
+
+## Research Conducted
+
+### Web Research
+- {Search topic 1}: {Key finding}
+- {Search topic 2}: {Key finding}
+- {Search topic 3}: {Key finding}
+
+### Technical Validation
+- {Test/tool used}: {Result}
+- {Local experiment}: {Outcome}
+
+### Code/File Analysis
+- {File examined}: {What we learned}
+
+## Key Findings
+
+### Finding 1: {Title}
+**Source**: {URL or file path}
+**Evidence**: {What was discovered}
+**Implication**: {What this means for our decision}
+
+### Finding 2: {Title}
+**Source**: {URL or file path}
+**Evidence**: {What was discovered}
+**Implication**: {What this means for our decision}
+
+## Options Analyzed
+
+### Option A: {Name}
+**Description**: {Brief overview}
+**Pros**:
+- {Benefit 1}
+- {Benefit 2}
+**Cons**:
+- {Drawback 1}
+- {Drawback 2}
+**Feasibility**: {Technical verdict}
+**Research Support**: {Citation numbers}
+
+### Option B: {Name}
+**Description**: {Brief overview}
+**Pros**:
+- {Benefit 1}
+**Cons**:
+- {Drawback 1}
+**Feasibility**: {Technical verdict}
+**Research Support**: {Citation numbers}
+
+## Decision/Verdict
+**Recommendation**: {What to do}
+**Rationale**: {Why, based on research}
+**Confidence Level**: {High/Medium/Low}
+**Timestamp**: {When decided}
+**Unknowns**: {What we still don't know}
+
+## Citations
+1. [{Title}]({URL}) - {Brief description}
+2. [{Title}]({URL}) - {Brief description}
+3. [{Title}]({URL}) - {Brief description}
+{... all sources used in research}
+
+## Action Items
+- [ ] {Next step based on research}
+- [ ] {Implementation task if decision made}
+
+## Related Documents
+- {Links to related session logs or files}
+```
+
+**When to use Research template**:
+- Session has 3+ WebSearch/WebFetch calls
+- Deep technical investigation or feasibility analysis
+- Multiple options compared with citations
+- Decision made based on research findings
 
 ## Confirmation Format
 
