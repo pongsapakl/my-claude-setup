@@ -299,6 +299,274 @@ OVERALL: Minor improvements suggested
 (None are blocking, but would improve quality)
 ```
 
+---
+
+## Monorepo-Specific Checks 📦
+
+### When Reviewing Monorepo Projects
+
+For projects with monorepo architecture (e.g., `one-pedal-landing-page/` with `frontend/` and `backend/`):
+
+#### 1. Dependency Isolation
+
+**Check**: Each workspace has independent dependencies
+
+```bash
+# Verify separate package.json files
+ls -la frontend/package.json
+ls -la backend/requirements.txt  # For Python backend
+
+# Check for shared node_modules (anti-pattern)
+ls -la node_modules/  # Should NOT exist at root for independent workspaces
+```
+
+**Validation**:
+- ✅ **GOOD**: `frontend/package.json` + `backend/requirements.txt` (separate)
+- ⚠️ **WARNING**: Root `node_modules/` shared by multiple workspaces
+- 💡 **SUGGESTION**: Consider monorepo manager (pnpm workspaces, Turborepo) if sharing dependencies
+
+**Why it matters**: Dependency isolation prevents version conflicts and ensures deployments are self-contained.
+
+#### 2. Build Isolation
+
+**Check**: Each workspace builds independently
+
+```bash
+# Frontend builds without referencing backend
+cd frontend && npm run build  # Should succeed standalone
+
+# Backend builds without referencing frontend
+cd backend && docker build .  # Should succeed standalone
+```
+
+**Anti-patterns to catch**:
+```bash
+# Grep for cross-workspace imports (bad)
+grep -r "\.\./backend/" frontend/src/
+grep -r "\.\./frontend/" backend/
+
+# Should return nothing (workspaces should be independent)
+```
+
+**Validation**:
+- ✅ **GOOD**: No `../backend/` imports in frontend, no `../frontend/` imports in backend
+- 🔴 **ISSUE**: Cross-workspace imports (tight coupling, breaks deployment)
+
+**Exception**: Scripts (like `scripts/sync-assets.sh`) CAN reference multiple workspaces.
+
+#### 3. Environment Variable Separation
+
+**Check**: Each workspace has its own `.env` files
+
+```bash
+# Check for proper .env structure
+ls -la frontend/.env.local
+ls -la frontend/.env.production
+ls -la backend/.env  # Or backend uses environment variables directly
+
+# Check .gitignore
+cat .gitignore | grep "\.env"
+```
+
+**Validation**:
+- ✅ **GOOD**: Each workspace has own .env files
+- ⚠️ **WARNING**: Shared .env at root (can cause confusion)
+- 🔴 **ISSUE**: `.env` files not gitignored
+
+**Best Practice**:
+```
+monorepo/
+├── frontend/
+│   ├── .env.local (gitignored)
+│   └── .env.production (gitignored)
+├── backend/
+│   └── .env (gitignored, or uses Cloud Run env vars)
+└── .gitignore (includes .env patterns)
+```
+
+#### 4. Documentation Sync
+
+**Check**: README and CLAUDE.md reflect monorepo structure
+
+```bash
+# Check README mentions monorepo
+cat README.md | grep -i "monorepo\|frontend\|backend"
+
+# Check CLAUDE.md documents both workspaces
+cat .claude/CLAUDE.md | grep -i "frontend\|backend"
+```
+
+**Validation**:
+- ✅ **GOOD**: Documentation clearly explains monorepo structure
+- ⚠️ **WARNING**: README outdated (mentions single project structure)
+- 📝 **SUGGESTION**: Add architecture diagram showing frontend/backend split
+
+**Example Good README Structure**:
+```markdown
+# Project Name
+
+## Architecture
+- `frontend/` - Next.js app deployed to Vercel
+- `backend/` - FastAPI app deployed to GCP Cloud Run
+
+## Quick Start
+### Frontend
+\`\`\`bash
+cd frontend
+npm install
+npm run dev
+\`\`\`
+
+### Backend
+\`\`\`bash
+cd backend
+uv run uvicorn main:app --reload
+\`\`\`
+```
+
+#### 5. Git Ignore Patterns
+
+**Check**: Proper ignore patterns for monorepo
+
+```bash
+# Read .gitignore
+cat .gitignore
+
+# Should ignore:
+# - Workspace-specific build artifacts (frontend/.next, backend/__pycache__)
+# - Environment files (frontend/.env*, backend/.env)
+# - Dependencies (frontend/node_modules, backend/.venv)
+```
+
+**Common Issues**:
+- ⚠️ **WARNING**: Build artifacts at root ignored, but workspace artifacts not ignored
+- 🔴 **ISSUE**: `.next/` ignored at root, but `frontend/.next/` still tracked
+
+**Fix**:
+```gitignore
+# Good monorepo .gitignore
+
+# Frontend
+frontend/.next/
+frontend/node_modules/
+frontend/.env*
+!frontend/.env.example
+
+# Backend
+backend/.venv/
+backend/__pycache__/
+backend/.env
+!backend/.env.example
+
+# Build artifacts
+build/
+dist/
+```
+
+#### 6. Deployment Independence
+
+**Check**: Each workspace can deploy independently
+
+```bash
+# Check GitHub Actions workflows
+ls -la .github/workflows/
+
+# Verify path filters for backend deployment
+cat .github/workflows/deploy-backend.yml | grep -A 5 "paths:"
+```
+
+**Expected**:
+```yaml
+# deploy-backend.yml
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'scripts/sync-assets.sh'  # Shared scripts that affect backend
+```
+
+**Validation**:
+- ✅ **GOOD**: Path filters isolate deployments (frontend changes don't trigger backend deploy)
+- ⚠️ **WARNING**: No path filters (every push deploys everything)
+- 🔴 **ISSUE**: Path filter missing workspace (backend changes don't trigger deploy)
+
+#### 7. Shared Code Organization
+
+**Check**: Shared utilities properly organized
+
+```bash
+# Check for shared code
+ls -la scripts/
+ls -la lib/  # Or shared/
+
+# Verify documentation explains shared code purpose
+```
+
+**Best Practices**:
+- ✅ **GOOD**: `scripts/` directory for cross-workspace utilities (sync-assets.sh)
+- ⚠️ **AVOID**: `lib/` directory with mixed frontend/backend code (unclear ownership)
+- 💡 **SUGGESTION**: If significant shared code, consider extracting to separate package
+
+**Example**:
+```
+monorepo/
+├── scripts/             # Shared utilities
+│   └── sync-assets.sh   # Syncs assets from 1P to backend
+├── frontend/            # Independent workspace
+└── backend/             # Independent workspace
+```
+
+---
+
+## Monorepo Code Review Report Format
+
+For monorepo projects, structure review by workspace:
+
+```
+📝 CODE REVIEW - [Monorepo Project Name]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏗️ MONOREPO STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ MONOREPO BEST PRACTICES:
+- Dependencies isolated (separate package.json/requirements.txt)
+- Build processes independent
+- Deployment triggers properly filtered
+- Documentation reflects monorepo structure
+
+⚠️ MONOREPO WARNINGS:
+1. [Issue found, e.g., shared .env at root]
+   Impact: [Why this matters]
+   Fix: [How to improve]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 FRONTEND WORKSPACE (frontend/)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ STRENGTHS:
+- [Frontend-specific strengths]
+
+💡 SUGGESTIONS:
+- [Frontend-specific suggestions]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ BACKEND WORKSPACE (backend/)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ STRENGTHS:
+- [Backend-specific strengths]
+
+💡 SUGGESTIONS:
+- [Backend-specific suggestions]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OVERALL: [Ready to deploy / Suggestions / Needs attention]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
 ## Best Practices You Advocate
 
 ### Next.js Specific
