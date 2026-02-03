@@ -15,7 +15,7 @@ This repo serves as my archive/backup for my workflow (integrated with Claude Co
 
 There are 4 main parts: agents, skills, commands, and rules.
 
-The most useful thing is **skills** here:
+The most useful thing is **skills** here (6 total):
 
 ### `/c-suite [question]`
 
@@ -85,23 +85,38 @@ This is a growing function from `session-log`. Normally with Claude plan mode, i
 
 **Update**: Looks like Anthropic has this [Clear Context before Plan Exeuction](https://x.com/bcherny/status/2012663636465254662) integrated, they are targetting similar pain point so this skill might be deprecated in the future soon. Though I still find it useful to have a log of what is discussed and what is done outside claude folder, and this feature still doesn't solve cross session / cross model integrity cleanly (i guess they will be able to sooner or later). [I sometime use claude to plan and antigravity to execute to save cost lol]
 
-### `/deployment-check`
+### `/deployment-check [--full]`
 
-Nothing much with this—I'm just too dumb to do security checks on my own when updating something on the web, so I let it do it for me.
+I'm too dumb to do security checks on my own when deploying, so I let it do it for me. Now handles monorepo (frontend/backend split), API contract validation, and license compliance.
 
 ```
-/deployment-check
+/deployment-check              # Standard (Security + Code Review)
+/deployment-check --full       # Add License Compliance check
 ```
 
-- Security Officer scans for secrets, vulnerabilities (BLOCKING)
-- Code Reviewer checks SEO, accessibility, performance (WARNINGS)
-- Get unified report: BLOCKED / APPROVED / APPROVED WITH WARNINGS
+**What it checks**:
+- Security Officer: secrets, HTTPS, vulnerabilities, API contracts, GCP/Vercel config (BLOCKING)
+- Code Reviewer: TypeScript, SEO, accessibility, performance, monorepo structure (WARNINGS)
+- License Officer (--full only): GPL/AGPL violations, JUCE license, attribution files (ADVISORY)
+
+Unified report: BLOCKED / APPROVED WITH WARNINGS / APPROVED
+
+### `/infra-check`
+
+Config drift detection—compares actual GCP/Vercel settings vs what's documented in CLAUDE.md. Useful for quarterly audits or when onboarding.
+
+```
+/infra-check
+```
+
+- Checks: Cloud Run memory/regions, Vercel env vars, GitHub Actions workflows
+- Reports drift with fix options (update docs or revert config)
 
 ---
 ## Other Components
 
 ### Agents
-All 7 agents are used in the skills above—I don't normally use them standalone, but it's possible to activate them individually if needed.
+All 8 agents are used in the skills above—I don't normally use them standalone, but it's possible to activate them individually if needed.
 
 | Agent | Focus | When They Help | Impact |
 |-------|-------|----------------|---------|
@@ -110,8 +125,9 @@ All 7 agents are used in the skills above—I don't normally use them standalone
 | **CMO** | Marketing, messaging | Landing pages, user acquisition | Advisory |
 | **CFO** | Financial, ROI | Costs, pricing, resources | Advisory |
 | **Product Lead** | UX, features | User experience, prioritization | Advisory |
-| **Security Officer** | Security | Deployment safety, vulnerabilities | **BLOCKING** |
-| **Code Reviewer** | Quality, practices | Code review, performance, SEO | Warnings |
+| **Security Officer** | Security | Deployment safety, vulnerabilities, API contracts | **BLOCKING** |
+| **Code Reviewer** | Quality, practices | Code review, performance, SEO, monorepo | Warnings |
+| **License Officer** | Licensing | GPL violations, commercial licenses, attribution | Advisory |
 
 ### Commands
 Just another entry point to skills. Each skill above has a corresponding command (from the old days when skills didn't exist). It looks like Anthropic now prefers Skills, so slash commands might be deprecated later. I rarely trigger via commands now anyway.
