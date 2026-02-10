@@ -30,6 +30,29 @@ Trigger when user says:
 
 **IMPORTANT**: Always save to the current working directory's `.claude/memory/session-logs/`, NOT to `~/.claude/`. Each project maintains its own session logs.
 
+---
+
+## ⚠️ CRITICAL: Comprehensiveness Requirement
+
+**ALWAYS capture the ENTIRE session, not just recent work.**
+
+Session logs are diary-style execution history. They must enable understanding what happened months later.
+
+**Before writing the log, verify:**
+- ✅ Reviewed FULL conversation from start to finish
+- ✅ Captured ALL phases of work (not just current/recent work)
+- ✅ Included ALL context, decisions, and technical details
+- ✅ Log tells complete story of what happened in session
+
+**NEVER:**
+- ❌ Create partial logs limited to "current work"
+- ❌ Focus only on most recent activity
+- ❌ Skip earlier phases or context
+
+**If in doubt:** Scroll to the beginning of conversation and read forward. Capture everything.
+
+---
+
 ## Session Log Templates
 
 ### Implementation Session
