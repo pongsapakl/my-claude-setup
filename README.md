@@ -32,16 +32,26 @@ This is where I find it a little [chunibyo](https://en.wikipedia.org/wiki/Ch%C5%
 
 ### `/session-log`
 
-This skill summarizes what is discussed in the Claude Code session to a log. It is useful to keep track of what is discussed and what is done. To me, it serves 2 purposes: 1) as a journal to go back in time as the project grows, 2) to make the LLM credits worth it by logging them out so I don't need to ask them again later (I'm broke and short on budget lol).
+Intelligent session documentation that adapts to complexity and prevents recency bias. It serves 2 purposes: 1) as a journal to go back in time as the project grows, 2) to make the LLM credits worth it by logging them out so I don't need to ask them again later (I'm broke and short on budget lol).
 
 ```
-/session-log <you can also add optional details on what to capture to the session log too>
+/session-log
 ```
 
-- Analyzes conversation automatically
-- Creates detailed log with decisions, action items
-- Saves to `.claude/memory/session-logs/`
-- Now supports Research Session template (auto-detects 3+ web searches)
+**What it does**:
+- **Discovers artifacts**: Checks git history, plan files, prior sessions
+- **Detects scope**: Automatically classifies as SMALL/MEDIUM/LARGE
+- **Multi-pass for large sessions**: Creates outline first, then documents phases
+- **Phase-aware**: Captures planning → implementation → debugging → refinement
+- **Self-verifies**: Explicit checklist ensures nothing is missed
+- **Execution log**: Tells complete story, not just recent work
+
+**Session types**:
+- SMALL (< 20 turns): Brief summary
+- MEDIUM (20-50 turns): Standard comprehensive log
+- LARGE (50+ turns / has plan / 5+ commits): Phase breakdown with full context
+
+**Key improvement**: No longer suffers from recency bias - captures entire session including initial planning and early implementation, not just recent debugging.
 
 ### `/research [topic]`
 
