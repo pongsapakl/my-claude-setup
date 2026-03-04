@@ -17,7 +17,7 @@ This repo serves as my archive/backup for my workflow (integrated with Claude Co
 
 ## Functionality
 
-There are 4 main parts: agents, skills, commands, and rules.
+There are 3 main parts: agents, skills, and rules.
 
 The most useful thing is **skills** here (8 total):
 
@@ -163,9 +163,6 @@ All 8 agents are used in the skills above—I don't normally use them standalone
 | **Security Officer** | Security | Deployment safety, vulnerabilities, API contracts | **BLOCKING** |
 | **Code Reviewer** | Quality, practices | Code review, performance, SEO, monorepo | Warnings |
 | **License Officer** | Licensing | GPL violations, commercial licenses, attribution | Advisory |
-
-### Commands
-Just another entry point to skills. Each skill above has a corresponding command (from the old days when skills didn't exist). It looks like Anthropic now prefers Skills, so slash commands might be deprecated later. I rarely trigger via commands now anyway.
 
 ### Rules
 Just a collection of rules that I find useful to have in the workflow, not really critical (tbh I don't get the 'rules' function, but CC recommended me to add it there so why not haha).
