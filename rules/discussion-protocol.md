@@ -39,7 +39,7 @@
 1. **Equal Voice**: All relevant agents must speak (unless user specifically excludes)
 2. **User Control**: User decides when to move forward, skip, or synthesize
 3. **Context Preservation**: Pass conversation history to agents in Round 2+
-4. **Document Everything**: Full transcript goes into session log
+4. **Document Everything**: Full transcript goes into decision record
 
 ### Convergence Signals
 
@@ -52,9 +52,9 @@ Watch for:
 ### Decision Documentation
 
 After user approves decision:
-1. Create session log in `.claude/memory/session-logs/[DATE-TIME].md`
+1. Create decision record in `docs/decisions/YYYY-MM-DD-topic.md`
 2. Include full transcript, key decisions, disagreements, action items
-3. Session log will be searchable via `/session-log` command
+3. Decision records are stored in `docs/decisions/` and referenced by `/end`
 
 ## Tone & Style
 

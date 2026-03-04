@@ -1,8 +1,12 @@
 # My Claude Team
 
+[Claude when you update readme please dont edit this part. This is handwritten (or handtyped) and I wanted to keep it as is. Below ## Quickstart you can do whatever you are born to do.]
+
 It appears to me that there are so many productivity frameworks out there trying to utilize the function of agents, skills, etc. as provided by Claude. Yet I find many of them are more generic and load everything up front (which I find somewhat annoying) and not tailored to my own needs. So, I created a custom one based on those frameworks out there and made it fit my requirements a little more. It is very basic yet so powerful for my workflow.
 
 This repo serves as my archive/backup for my workflow (integrated with Claude Code, obviously), yet I try to make it more generic by moving project-specific information to the `CLAUDE.md` file and letting agents read from there to make this tool more reusable for other projects. If you find this interesting, please feel free to test it out, fork it—comments are appreciated, yet I can't confirm I'll fix issues since it is my workflow for my needs after all. Also feel free to basically fetch this to Claude and let it generate your own version of this. Well, maybe fetching some other repo might provide more polished ideas, but whatever.
+
+[UPDATE v.0.5.0] I also feels like handing over session for me is really important. Despite there are things like `/compact` it is still not as good as i think it can be. That is why I use a file-based system to hand over session. This way, not only agent, but also us humans can catch up on what is left, what to do next more easily. Key is what is just done, and what to do next (along with related file). 
 
 ## Quick Install
 
@@ -15,7 +19,50 @@ This repo serves as my archive/backup for my workflow (integrated with Claude Co
 
 There are 4 main parts: agents, skills, commands, and rules.
 
-The most useful thing is **skills** here (6 total):
+The most useful thing is **skills** here (8 total):
+
+### `/init`
+
+Bootstrap a new project workspace with the docs structure and WORK.md. Run this once when starting a new project.
+
+```
+/init
+```
+
+- Creates `docs/sessions/`, `docs/decisions/`, `docs/research/`, `docs/plans/`
+- Creates `WORK.md` (live state file) from template
+- Asks per-folder which to add to `.gitignore`
+- Smart merge if structure already exists
+- Offers to migrate legacy `.claude/memory/session-logs/`
+
+### `/start`
+
+Session onboarding — reads current state and gets you up to speed in under 30 seconds.
+
+```
+/start
+```
+
+- Reads `WORK.md` and latest session log from `docs/sessions/`
+- Validates handoff quality ("Next Session Starts With" field)
+- Presents onboarding summary (phase, what was done, handoff note, blockers)
+- Flags incomplete handoffs
+- Asks what to focus on
+
+### `/end`
+
+Session close with quality-tested handover. This replaced the old `/session-log` skill — it does everything session-log did, plus creates an actionable bridge to the next session.
+
+```
+/end
+```
+
+- Scans conversation for accomplishments, decisions, and open items
+- Confirms summary with user before writing
+- Writes session log to `docs/sessions/YYYY-MM-DD-topic.md`
+- Quality-tests "Next Session Starts With" (must be verb-starting, specific, self-contained, and half-done-aware)
+- Updates `WORK.md` with current state
+- Optionally writes ADRs to `docs/decisions/` and research notes to `docs/research/`
 
 ### `/c-suite [question]`
 
@@ -28,30 +75,7 @@ This is where I find it a little [chunibyo](https://en.wikipedia.org/wiki/Ch%C5%
 - Each agent (CEO, CTO, CMO, CFO, Product Lead) provides their perspective
 - You respond after each agent—can add your verdict, rationale, or random thoughts there
 - Say "synthesize" to get final recommendation
-- Decision auto-saved to session logs
-
-### `/session-log`
-
-Intelligent session documentation that adapts to complexity and prevents recency bias. It serves 2 purposes: 1) as a journal to go back in time as the project grows, 2) to make the LLM credits worth it by logging them out so I don't need to ask them again later (I'm broke and short on budget lol).
-
-```
-/session-log
-```
-
-**What it does**:
-- **Discovers artifacts**: Checks git history, plan files, prior sessions
-- **Detects scope**: Automatically classifies as SMALL/MEDIUM/LARGE
-- **Multi-pass for large sessions**: Creates outline first, then documents phases
-- **Phase-aware**: Captures planning → implementation → debugging → refinement
-- **Self-verifies**: Explicit checklist ensures nothing is missed
-- **Execution log**: Tells complete story, not just recent work
-
-**Session types**:
-- SMALL (< 20 turns): Brief summary
-- MEDIUM (20-50 turns): Standard comprehensive log
-- LARGE (50+ turns / has plan / 5+ commits): Phase breakdown with full context
-
-**Key improvement**: No longer suffers from recency bias - captures entire session including initial planning and early implementation, not just recent debugging.
+- Decision saved to `docs/decisions/`
 
 ### `/research [topic]`
 
@@ -83,7 +107,7 @@ Intelligent research skill that auto-detects scope and calls relevant C-level ag
 
 ### `/plan [feature]`
 
-This is a growing function from `session-log`. Normally with Claude plan mode, it will create a plan as markdown in `~/.claude/projects/` which is quite hard to find. This skill will create a plan as markdown in the project directory, which is more accessible, and more importantly, it can work across sessions. When Claude is dead (by context full or credit limit), you can still use the plan to continue your work later on easily. I think there might be a better way to use the existing plan mode to do this, and it might be more convenient in the future, yet I'm comfortable with this one lol.
+Creates implementation plans that live in `docs/plans/` and are referenced from `WORK.md`. Plans work across sessions — when Claude's context is full or credits run out, you can still use the plan to continue later.
 
 ```
 /plan step-by-step adding authentication feature on v3.0
@@ -91,7 +115,8 @@ This is a growing function from `session-log`. Normally with Claude plan mode, i
 
 - Asks clarifying questions (purpose, rationale, timeline)
 - Creates rationale-driven plan with task groups
-- Exports to project directory
+- Exports to `docs/plans/YYYY-MM-DD-topic.md`
+- Updates `WORK.md` Active Plan field
 
 **Update**: Looks like Anthropic has this [Clear Context before Plan Exeuction](https://x.com/bcherny/status/2012663636465254662) integrated, they are targetting similar pain point so this skill might be deprecated in the future soon. Though I still find it useful to have a log of what is discussed and what is done outside claude folder, and this feature still doesn't solve cross session / cross model integrity cleanly (i guess they will be able to sooner or later). [I sometime use claude to plan and antigravity to execute to save cost lol]
 

@@ -18,7 +18,7 @@ Trigger when user says:
 - "make a plan for..."
 - "update the plan" / "update the {project} plan"
 
-**Pattern**: Auto-invoke on explicit planning requests (similar to session-log)
+**Pattern**: Auto-invoke on explicit planning requests
 
 ## How It Works
 
@@ -33,7 +33,7 @@ Trigger when user says:
   - ❌ Skip session logs.
   - ✅ Quick file tree or grep.
   - ✅ **ASK FIRST**: Clarify intent before reading any code.
-- **Output**: `LIGHTWEIGHT-PLAN.md` (Checklist style)
+- **Output**: `docs/plans/YYYY-MM-DD-topic.md` (Checklist style)
 
 **MODE B: COMPREHENSIVE (New features, complex logic, architecture)**
 - **Triggers**: "Add new feature", "Design this system", "Refactor core logic"
@@ -42,7 +42,7 @@ Trigger when user says:
   - ✅ Read session logs (decisions).
   - ✅ Search for patterns.
   - ✅ Check dependencies.
-- **Output**: `COMPREHENSIVE-PLAN.md` (Design doc style)
+- **Output**: `docs/plans/YYYY-MM-DD-topic.md` (Design doc style)
 
 ### Step 1: Understand Requirements (1-2 min)
 - Parse user's goal or feature request
@@ -62,8 +62,8 @@ Trigger when user says:
 - SKIP to Step 3 immediately - ask questions first!
 
 **For LARGE tasks (new features, integrations)**:
-- Search for related session logs (architectural decisions, C-Suite meetings)
-- Read relevant existing plans if updating
+- Search `docs/sessions/` for related session logs and `docs/decisions/` for architectural decisions
+- Read relevant existing plans in `docs/plans/` if updating
 - Identify similar patterns in codebase
 - Check for dependencies or blockers
 
@@ -109,12 +109,13 @@ Trigger when user says:
 **Tools**: Write (use appropriate template), Bash (get date)
 
 ### Step 5: Export & Confirm (1 min)
-- Save full plan to project directory: `{PROJECT}/{FEATURE}-PLAN.md` (single source of truth)
+- Save full plan to `docs/plans/YYYY-MM-DD-topic.md` (single source of truth)
+- Update `WORK.md` "Active Plan" field to point to the new plan file path
 - Show summary with next steps
 
-**IMPORTANT**: The exported plan is the authoritative version. No duplicate copies needed - simpler to maintain, clearer source of truth.
+**IMPORTANT**: The exported plan is the authoritative version. Plans live in `docs/plans/` alongside other documentation artifacts.
 
-**Tools**: Write, Bash
+**Tools**: Write, Read, Bash
 
 ## Plan Templates
 
@@ -193,7 +194,7 @@ Step 3: Asks clarifying questions:
   ↓
 Step 4: Structures plan with task groups + rationale
   ↓
-Step 5: Exports to [project-name]/VOICE-INPUT-PLAN.md
+Step 5: Exports to docs/plans/YYYY-MM-DD-voice-input.md + updates WORK.md Active Plan
   ↓
 Confirms: ✅ Plan created with summary
 ```
@@ -219,7 +220,7 @@ Step 3: Ask questions IMMEDIATELY:
   ↓
 Step 4: Structures plan based on user's vision
   ↓
-Step 5: Exports to [project-name]/SOURCE-REORGANIZATION-PLAN.md
+Step 5: Exports to docs/plans/YYYY-MM-DD-source-reorganization.md + updates WORK.md Active Plan
   ↓
 Confirms: ✅ Plan created with summary
 ```
@@ -231,7 +232,7 @@ User: "update the [project-name] plan with new priorities"
   ↓
 Skill detects "update" keyword
   ↓
-Searches for existing plan files (Glob: "[project-name]/*PLAN.md")
+Searches for existing plan files (Glob: "docs/plans/*.md")
   ↓
 Reads current plan (Read tool)
   ↓
@@ -251,21 +252,23 @@ Confirms: ✅ Plan updated with changes summary
 
 ## File Naming
 
-### Plan Files (Project Directory)
-Format: `{PROJECT}-{FEATURE}-PLAN.md` or `{PROJECT}-PLAN.md`
+### Plan Files
+Format: `docs/plans/YYYY-MM-DD-kebab-case-topic.md`
 
-Use uppercase for plan files to make them stand out.
+Examples:
+- `docs/plans/2026-03-04-user-authentication.md`
+- `docs/plans/2026-03-04-api-refactor.md`
 
-**Single source of truth**: Plans live in project directory only (not in .claude/).
+**Single source of truth**: Plans live in `docs/plans/`. The active plan is referenced in `WORK.md`.
 ## Detecting Plan Updates
 
 ## Tools Usage
 
-- **Read**: Read existing plans, session logs, code files for context
-- **Grep**: Search for related patterns, architectural decisions
-- **Glob**: Find files matching patterns (e.g., all `*-PLAN.md` in project)
-- **Bash**: Get current date for metadata, generate random IDs
-- **Write**: Export plan to project directory and `.claude/plans/`
+- **Read**: Read existing plans in `docs/plans/`, session logs in `docs/sessions/`, code files for context
+- **Grep**: Search for related patterns, architectural decisions in `docs/decisions/`
+- **Glob**: Find files matching patterns (e.g., `docs/plans/*.md`)
+- **Bash**: Get current date for metadata
+- **Write**: Export plan to `docs/plans/`, update WORK.md Active Plan field
 - **AskUserQuestion**: Clarify goals, rationale, constraints upfront
 
 ## Key Principles

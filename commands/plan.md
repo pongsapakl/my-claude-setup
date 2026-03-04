@@ -11,10 +11,11 @@ Use the plan skill to generate a structured implementation plan:
    - Any constraints or non-goals?
    - Timeline?
 3. Structure plan with task groups, files, dependencies, rationale
-4. Export to project directory for cross-session continuity
+4. Export to `docs/plans/` and update WORK.md Active Plan field
 
 **Output**:
-- Plan file: `{PROJECT}/{FEATURE}-PLAN.md` (single source of truth)
+- Plan file: `docs/plans/YYYY-MM-DD-topic.md` (single source of truth)
+- WORK.md updated with Active Plan path
 - Links to related session logs and architectural decisions
 
 **Plan includes**:

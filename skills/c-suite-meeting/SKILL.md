@@ -114,10 +114,10 @@ When convergence detected or user requests:
 
 Once user decides:
 
-1. Create session log in `.claude/memory/session-logs/[TIMESTAMP].md`
+1. Save decision record to `docs/decisions/YYYY-MM-DD-topic.md`
 2. Use the template format:
    ```markdown
-   # C-Suite Meeting: [TOPIC] - [DATE]
+   # Decision Record: C-Suite Meeting — [TOPIC] - [DATE]
 
    ## Question
    [User's original question]
@@ -161,6 +161,14 @@ Once user decides:
    - [ ] [Action 1]
    - [ ] [Action 2]
    ```
+
+### Step 6: Additional Artifacts (Optional)
+
+If the meeting produced artifacts beyond the decision:
+- **Research findings** from agent analysis → offer to save to `docs/research/YYYY-MM-DD-topic.md`
+- **Implementation plan** from the decision → offer to save to `docs/plans/YYYY-MM-DD-topic.md`
+
+These are opt-in — ask the user if they want these additional files.
 
 ## Example Flow
 
@@ -254,8 +262,8 @@ Create session log with full transcript and decision.
 ## Post-Meeting
 
 After documenting decision:
-1. Session log saved to `.claude/memory/session-logs/`
-2. Session analyzer will detect patterns (when implemented via SessionEnd hook)
-3. Decision becomes searchable via `/brain-search`
+1. Decision record saved to `docs/decisions/`
+2. The `/end` skill will reference this decision when closing the session
+3. Decision is searchable in `docs/decisions/` for future reference
 
 This completes the C-Suite meeting cycle.

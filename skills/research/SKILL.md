@@ -494,17 +494,14 @@ Which approach?
 
 ---
 
-## Session Log Integration
+## Research Output
 
-After research completes, **automatically offer to save** using session-log skill:
+After research completes, save findings to `docs/research/YYYY-MM-DD-topic.md`.
 
-```
-Research complete. Should I save this to session log?
+- **Quick Research**: Ask user if they want to save (small findings may not need a file).
+- **Deep Research**: Always save automatically — too much context to lose.
 
-[If user says yes]
-→ Invoke session-log skill (Research Session template)
-→ Full findings + citations preserved in .claude/memory/session-logs/
-```
+The `/end` skill will reference these research notes when closing the session.
 
 ---
 
@@ -516,7 +513,7 @@ Research complete. Should I save this to session log?
 4. **Citation-Rich** - Every claim backed by source
 5. **User Control** - Meta-step when scope unclear, user always decides final action
 6. **Efficiency** - Quick mode for simple questions (don't over-research)
-7. **Integration** - Seamlessly hands off to session-log for documentation
+7. **Persistent Output** - Research saved to `docs/research/` for future reference
 
 ---
 

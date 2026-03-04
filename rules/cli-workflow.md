@@ -34,17 +34,24 @@ git log --oneline -5
 ```
 
 ### Knowledge Management
-Instead of Notion MCP server, use local markdown files:
+Instead of Notion MCP server, use local markdown files in `docs/`:
 
 ```bash
-# Save session log
-echo "content" > .claude/memory/session-logs/2025-12-18-decision.md
+# Session logs
+ls docs/sessions/
+cat docs/sessions/2026-03-04-auth-setup.md
 
-# Search past decisions
-grep -r "authentication" .claude/memory/
+# Decisions / ADRs
+grep -r "authentication" docs/decisions/
 
-# Read past sessions
-cat .claude/memory/session-logs/2025-12-17-*.md
+# Research notes
+cat docs/research/2026-03-04-auth-options.md
+
+# Plans
+cat docs/plans/2026-03-04-auth-flow.md
+
+# Live project state
+cat WORK.md
 ```
 
 ### Benefits
@@ -73,7 +80,7 @@ All git operations should:
 4. Use `gh` CLI for GitHub-specific operations when needed
 
 All knowledge management should:
-1. Save to `.claude/memory/` as markdown files
-2. Use descriptive filenames with dates
+1. Save to `docs/` subfolders as markdown files (see `docs-structure` rule)
+2. Use `YYYY-MM-DD-topic.md` filename format
 3. Be searchable via grep/file tools
-4. Follow templates defined in skills if applicable
+4. Follow the `/end`, `/plan`, `/research`, `/c-suite` skill templates
