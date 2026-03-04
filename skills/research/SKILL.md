@@ -501,7 +501,9 @@ After research completes, save findings to `docs/research/YYYY-MM-DD-topic.md`.
 - **Quick Research**: Ask user if they want to save (small findings may not need a file).
 - **Deep Research**: Always save automatically — too much context to lose.
 
-The `/end` skill will reference these research notes when closing the session.
+**If the research led to a decision** (e.g., "use Option A over B"), also write an ADR to `docs/decisions/YYYY-MM-DD-topic.md`. Research captures *what was investigated*; the ADR captures *what was decided and why*. Both are valuable.
+
+The `/end` skill will reference these notes when closing the session.
 
 ---
 
