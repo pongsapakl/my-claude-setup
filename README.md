@@ -1,174 +1,195 @@
 # My Claude Team
 
-[Claude when you update readme please dont edit this part. This is handwritten (or handtyped) and I wanted to keep it as is. Below ## Quickstart you can do whatever you are born to do.]
+[Claude when you update readme please dont edit this part. This is handwritten (or handtyped) and I wanted to keep it as is. Below ## Quick Install you can do whatever you are born to do.]
 
 It appears to me that there are so many productivity frameworks out there trying to utilize the function of agents, skills, etc. as provided by Claude. Yet I find many of them are more generic and load everything up front (which I find somewhat annoying) and not tailored to my own needs. So, I created a custom one based on those frameworks out there and made it fit my requirements a little more. It is very basic yet so powerful for my workflow.
 
 This repo serves as my archive/backup for my workflow (integrated with Claude Code, obviously), yet I try to make it more generic by moving project-specific information to the `CLAUDE.md` file and letting agents read from there to make this tool more reusable for other projects. If you find this interesting, please feel free to test it out, fork it—comments are appreciated, yet I can't confirm I'll fix issues since it is my workflow for my needs after all. Also feel free to basically fetch this to Claude and let it generate your own version of this. Well, maybe fetching some other repo might provide more polished ideas, but whatever.
 
-[UPDATE v.0.5.0] I also feels like handing over session for me is really important. Despite there are things like `/compact` it is still not as good as i think it can be. That is why I use a file-based system to hand over session. This way, not only agent, but also us humans can catch up on what is left, what to do next more easily. Key is what is just done, and what to do next (along with related file). 
+[UPDATE v.0.5.0] I also feels like handing over session for me is really important. Despite there are things like `/compact` it is still not as good as i think it can be. That is why I use a file-based system to hand over session. This way, not only agent, but also us humans can catch up on what is left, what to do next more easily. Key is what is just done, and what to do next (along with related file).
 
 ## Quick Install
 
 ```bash
-/plugin marketplace add pongsapakl/my-claude-team 
-/plugin install my-claude-team 
+/plugin marketplace add pongsapakl/my-claude-team
+/plugin install my-claude-team
 ```
 
-## Functionality
+## What Problem Does This Solve?
 
-There are 3 main parts: agents, skills, and rules.
+Claude Code sessions are ephemeral. When a session ends — whether from context limits, credit caps, or just closing the terminal — all the context about what you were doing, what decisions you made, and what comes next is gone. The next session starts from zero.
 
-The most useful thing is **skills** here (8 total):
+This plugin fixes that with a **file-based handover system**. At the end of every session, `/end` writes down what was done, what's half-finished, and — most importantly — a specific, actionable note for the next session to pick up from. At the start of the next session, `/start` reads that note and gets you (or Claude) back up to speed in seconds.
 
-### `/init`
+It also gives you tools to make better decisions (`/c-suite`, `/research`) and keep a project's history organized (`docs/decisions/`, `docs/research/`, `docs/plans/`).
 
-Bootstrap a new project workspace with the docs structure and WORK.md. Run this once when starting a new project.
+## How It Works
 
-```
-/init
-```
+```text
+  ┌─────────────────────────────────────────────────────────────┐
+  │                     SESSION LIFECYCLE                        │
+  │                                                             │
+  │   /init (once)         /start            /end               │
+  │   ┌──────────┐      ┌──────────┐      ┌──────────┐         │
+  │   │ Set up   │      │ Read     │      │ Write    │         │
+  │   │ docs/    │      │ WORK.md  │      │ session  │         │
+  │   │ folders  │      │ + latest │      │ log +    │         │
+  │   │ + WORK.md│      │ session  │      │ update   │         │
+  │   └──────────┘      │ log      │      │ WORK.md  │         │
+  │        │            └────┬─────┘      └────┬─────┘         │
+  │        │                 │                  │               │
+  │        ▼                 ▼                  ▲               │
+  │   ┌──────────────────────────────────────────────┐         │
+  │   │                YOUR WORK                      │         │
+  │   │                                               │         │
+  │   │  /research ──► docs/research/                 │         │
+  │   │  /c-suite  ──► docs/decisions/                │         │
+  │   │  /plan     ──► docs/plans/                    │         │
+  │   │  coding, debugging, etc.                      │         │
+  │   └───────────────────────────────────────────────┘         │
+  └─────────────────────────────────────────────────────────────┘
 
-- Creates `docs/sessions/`, `docs/decisions/`, `docs/research/`, `docs/plans/`
-- Creates `WORK.md` (live state file) from template
-- Asks per-folder which to add to `.gitignore`
-- Smart merge if structure already exists
-- Offers to migrate legacy `.claude/memory/session-logs/`
-
-### `/start`
-
-Session onboarding — reads current state and gets you up to speed in under 30 seconds.
-
-```
-/start
-```
-
-- Reads `WORK.md` and latest session log from `docs/sessions/`
-- Validates handoff quality ("Next Session Starts With" field)
-- Presents onboarding summary (phase, what was done, handoff note, blockers)
-- Flags incomplete handoffs
-- Asks what to focus on
-
-### `/end`
-
-Session close with quality-tested handover. This replaced the old `/session-log` skill — it does everything session-log did, plus creates an actionable bridge to the next session.
-
-```
-/end
-```
-
-- Scans conversation for accomplishments, decisions, and open items
-- Confirms summary with user before writing
-- Writes session log to `docs/sessions/YYYY-MM-DD-topic.md`
-- Quality-tests "Next Session Starts With" (must be verb-starting, specific, self-contained, and half-done-aware)
-- Updates `WORK.md` with current state
-- Optionally writes ADRs to `docs/decisions/` and research notes to `docs/research/`
-
-### `/c-suite [question]`
-
-This is where I find it a little [chunibyo](https://en.wikipedia.org/wiki/Ch%C5%ABniby%C5%8D) when you say "let's call a C-level meeting!" Yet, I find it so useful to have a round-robin debate with several subagents. It actually refines your ideas from several perspectives (though each C-persona might need more time to develop). I call it when I want to get the big visionary direction of the project, that kind of thing. You can do something like:
-
-```
-/c-suite Should we position our v3.0 as a premium version or a free version with upgradeable features?
+  SESSION 1                          SESSION 2
+  ┌────────────────────┐             ┌────────────────────┐
+  │ /start             │             │ /start             │
+  │   ↓                │             │   ↓                │
+  │ (work)             │  WORK.md    │ (work)             │
+  │   ↓                │ ─────────►  │   ↓                │
+  │ /end               │  + session  │ /end               │
+  │  "Next: Wire up    │    log      │  "Next: ..."       │
+  │   the webhook..."  │             │                    │
+  └────────────────────┘             └────────────────────┘
 ```
 
-- Each agent (CEO, CTO, CMO, CFO, Product Lead) provides their perspective
-- You respond after each agent—can add your verdict, rationale, or random thoughts there
-- Say "synthesize" to get final recommendation
-- Decision saved to `docs/decisions/`
+## Typical Workflow
 
-### `/research [topic]`
+Here's what using this looks like day-to-day:
 
-Intelligent research skill that auto-detects scope and calls relevant C-level agents only when needed for big decisions.
+**First time on a project** — run `/init` once:
 
-```
-/research can we do real-time audio in browser?
-```
-
-**Quick Mode** (5-15 min):
-- Single focused question, 1-3 searches
-- Present facts in digestible format
-- No agents called, user decides
-
-**Deep Mode** (30-60 min):
-- Multiple options, 5+ searches
-- Auto-invokes relevant C-level agents for verdict
-  - Architecture → CTO, Product Lead
-  - Strategy → CEO, Product Lead, CMO
-  - Cost → CFO, CTO
-  - Security → Security Officer, CTO
-- Comprehensive analysis with citations
-- Synthesized recommendation
-
-**Meta-Step** (when unclear):
-- Presents quick scope assessment
-- Asks: Quick or Deep research?
-- Clear format for easy decision
-
-### `/plan [feature]`
-
-Creates implementation plans that live in `docs/plans/` and are referenced from `WORK.md`. Plans work across sessions — when Claude's context is full or credits run out, you can still use the plan to continue later.
-
-```
-/plan step-by-step adding authentication feature on v3.0
+```text
+> /init
+✓ Created docs/sessions/, docs/decisions/, docs/research/, docs/plans/
+✓ Created WORK.md
+✓ Added docs/sessions/ to .gitignore
 ```
 
-- Asks clarifying questions (purpose, rationale, timeline)
-- Creates rationale-driven plan with task groups
-- Exports to `docs/plans/YYYY-MM-DD-topic.md`
-- Updates `WORK.md` Active Plan field
+**Starting a session** — run `/start`:
 
-**Update**: Looks like Anthropic has this [Clear Context before Plan Exeuction](https://x.com/bcherny/status/2012663636465254662) integrated, they are targetting similar pain point so this skill might be deprecated in the future soon. Though I still find it useful to have a log of what is discussed and what is done outside claude folder, and this feature still doesn't solve cross session / cross model integrity cleanly (i guess they will be able to sooner or later). [I sometime use claude to plan and antigravity to execute to save cost lol]
+```text
+> /start
 
-### `/deployment-check [--full]`
+Phase: Building auth system
+Last session (2026-03-03): Implemented JWT middleware, wrote login endpoint
+Resuming from: "Add refresh token rotation to auth/tokens.ts — the access token
+  flow works but refresh is stubbed out. Schema is in docs/decisions/2026-03-02-jwt-strategy.md"
+Open questions: none
 
-I'm too dumb to do security checks on my own when deploying, so I let it do it for me. Now handles monorepo (frontend/backend split), API contract validation, and license compliance.
-
-```
-/deployment-check              # Standard (Security + Code Review)
-/deployment-check --full       # Add License Compliance check
+What would you like to focus on?
 ```
 
-**What it checks**:
-- Security Officer: secrets, HTTPS, vulnerabilities, API contracts, GCP/Vercel config (BLOCKING)
-- Code Reviewer: TypeScript, SEO, accessibility, performance, monorepo structure (WARNINGS)
-- License Officer (--full only): GPL/AGPL violations, JUCE license, attribution files (ADVISORY)
+**During a session** — work normally, use other skills as needed:
 
-Unified report: BLOCKED / APPROVED WITH WARNINGS / APPROVED
-
-### `/infra-check`
-
-Config drift detection—compares actual GCP/Vercel settings vs what's documented in CLAUDE.md. Useful for quarterly audits or when onboarding.
-
-```
-/infra-check
+```text
+> /research should we use Redis or in-memory for token blacklist?
+> /c-suite should we add social login for v1 or keep email-only?
+> /plan add password reset flow
 ```
 
-- Checks: Cloud Run memory/regions, Vercel env vars, GitHub Actions workflows
-- Reports drift with fix options (update docs or revert config)
+**Ending a session** — run `/end`:
 
----
-## Other Components
+```text
+> /end
 
-### Agents
-All 8 agents are used in the skills above—I don't normally use them standalone, but it's possible to activate them individually if needed.
+Done:
+- Implemented refresh token rotation
+- Added token blacklist (chose Redis — see docs/decisions/2026-03-04-redis-blacklist.md)
 
-| Agent | Focus | When They Help | Impact |
-|-------|-------|----------------|---------|
-| **CEO** | Strategy, market fit | Business decisions, positioning | Advisory |
-| **CTO** | Technical architecture | Tech stack, feasibility, scalability | Advisory |
-| **CMO** | Marketing, messaging | Landing pages, user acquisition | Advisory |
-| **CFO** | Financial, ROI | Costs, pricing, resources | Advisory |
-| **Product Lead** | UX, features | User experience, prioritization | Advisory |
-| **Security Officer** | Security | Deployment safety, vulnerabilities, API contracts | **BLOCKING** |
-| **Code Reviewer** | Quality, practices | Code review, performance, SEO, monorepo | Warnings |
-| **License Officer** | Licensing | GPL violations, commercial licenses, attribution | Advisory |
+Half-done:
+- Password reset flow — email sending works, reset page not built yet
 
-### Rules
-Just a collection of rules that I find useful to have in the workflow, not really critical (tbh I don't get the 'rules' function, but CC recommended me to add it there so why not haha).
+Next session starts with:
+"Build the reset password page at app/auth/reset/page.tsx — the API endpoint
+  POST /api/auth/reset exists and sends emails. Need the form UI that calls it
+  and handles the token from the URL query param."
 
+✓ Session logged: docs/sessions/2026-03-04-auth-tokens.md
+✓ WORK.md updated
+```
 
-## Personal Project Information
+**Next session** (even days later, even a different model) — run `/start` and it picks up exactly there.
+
+## Getting Started
+
+After installing, run `/init` in your project to set up the workspace:
+
+```text
+your-project/
+├── WORK.md                  ← live state (what's happening now)
+├── docs/
+│   ├── sessions/            ← session logs (written by /end)
+│   ├── decisions/           ← ADRs (written by any skill)
+│   ├── research/            ← research spikes (written by /research)
+│   └── plans/               ← implementation plans (written by /plan)
+└── CLAUDE.md                ← your project context (you write this)
+```
+
+## Skills Reference (8 total)
+
+### Session Management — `/init`, `/start`, `/end`
+
+These three skills form the core workflow. They keep context across sessions so you (and Claude) never lose track of where things are.
+
+| Skill | When | What it does |
+|-------|------|-------------|
+| `/init` | Once per project | Creates `docs/` folders + `WORK.md` template, asks what to gitignore |
+| `/start` | Beginning of session | Reads `WORK.md` + latest session log, validates handoff, asks what to focus on |
+| `/end` | End of session | Writes session log, updates `WORK.md`, quality-tests the handoff note |
+
+The key innovation is the **"Next Session Starts With"** field — a quality-gated handoff note that must be verb-starting, specific, self-contained, and half-done-aware. This means any new session (human or AI) can pick up exactly where the last one left off.
+
+### Strategic — `/c-suite`, `/research`, `/plan`
+
+| Skill | Example | What it does |
+|-------|---------|-------------|
+| `/c-suite` | `/c-suite Should we go freemium or paid?` | Round-robin debate with CEO, CTO, CMO, CFO, Product Lead agents. You respond after each. Decisions saved to `docs/decisions/` |
+| `/research` | `/research can we do real-time audio in browser?` | Auto-detects quick vs deep scope. Deep mode invokes relevant C-level agents. Findings saved to `docs/research/` |
+| `/plan` | `/plan add authentication to v3.0` | Creates implementation plan with rationale. Saved to `docs/plans/`, referenced from `WORK.md` |
+
+### Ops — `/deployment-check`, `/infra-check`
+
+| Skill | What it does |
+|-------|-------------|
+| `/deployment-check` | Pre-deploy safety: Security Officer (blocking) + Code Reviewer (warnings). Use `--full` for license compliance |
+| `/infra-check` | Config drift detection: compares actual GCP/Vercel settings vs CLAUDE.md docs |
+
+## Agents
+
+8 agents power the skills above. They can also be activated individually if needed.
+
+| Agent | Focus | Impact |
+|-------|-------|--------|
+| **CEO** | Strategy, market fit | Advisory |
+| **CTO** | Technical architecture, scalability | Advisory |
+| **CMO** | Marketing, messaging, acquisition | Advisory |
+| **CFO** | Financial, ROI, pricing | Advisory |
+| **Product Lead** | UX, features, prioritization | Advisory |
+| **Security Officer** | Deployment safety, vulnerabilities | **Blocking** |
+| **Code Reviewer** | Code quality, performance, SEO | Warnings |
+| **License Officer** | GPL compliance, attribution | Advisory |
+
+## Rules
+
+Plugin-level rules are loaded automatically when installed:
+
+- **docs-structure** — what each `docs/` folder is for, when to write ADRs
+- **session-workflow** — `/start` → `/end` lifecycle, handoff quality criteria
+- **cli-workflow** — use CLI tools over MCP servers to save tokens
+- **discussion-protocol** — how C-Suite round-robin debates work
+- **git-commit-workflow** — commit conventions
+- **security-standards** — non-negotiable security checks
+
+## Customization
 
 Since the agents and some workflows will look for your information, it is useful to add it to the `CLAUDE.md` file. Some example information can be as below. Feel free to add and build whatever feels right for you.
 
