@@ -1,7 +1,7 @@
 {
   "name": "my-claude-team",
-  "version": "0.5.0",
-  "description": "Generic recyclable agent team framework with session handover workflow (/start, /end), strategic planning, C-Suite agents, and deployment checks. Customizable for any project via WORK.md and CLAUDE.md context.",
+  "version": "0.6.0",
+  "description": "Agent team framework with multi-track session handover (/start, /end), human-facing TODO.md + AI-facing WORK.md, rich narrative session logs, strategic planning, C-Suite agents, and deployment checks.",
   "author": {
     "name": "Pongsapak Lueangratana"
   },

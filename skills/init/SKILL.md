@@ -1,12 +1,12 @@
 ---
 name: init
-description: Bootstrap workspace with docs structure and WORK.md. Auto-invokes on "/init", "initialize workspace", "set up project structure".
+description: Bootstrap workspace with docs structure, WORK.md, and TODO.md. Auto-invokes on "/init", "initialize workspace", "set up project structure".
 allowed-tools: [Bash, Write, Read, Glob, AskUserQuestion]
 ---
 
 # Init — Workspace Bootstrapper
 
-Sets up the documentation structure and live state file for a new project.
+Sets up the documentation structure, live state file (WORK.md), and human scratchpad (TODO.md) for a new project.
 
 ## When to Auto-Invoke
 
@@ -26,8 +26,8 @@ Check what already exists in the project root:
 ```bash
 # Check for existing docs folders
 ls -d docs/sessions docs/decisions docs/research docs/plans 2>/dev/null
-# Check for WORK.md
-ls WORK.md 2>/dev/null
+# Check for WORK.md and TODO.md
+ls WORK.md TODO.md 2>/dev/null
 # Check for legacy .claude/memory/session-logs
 ls -d .claude/memory/session-logs 2>/dev/null
 ```
@@ -48,6 +48,11 @@ For **each** existing item, use AskUserQuestion:
   - **Replace** (overwrite with fresh template)
   - **Skip** (don't touch)
 
+- "TODO.md already exists. What should I do?"
+  - **Keep** (leave as-is)
+  - **Replace** (overwrite with fresh template)
+  - **Skip** (don't touch)
+
 If nothing exists, skip this step entirely — just create everything.
 
 ### Step 3: Create Folder Structure
@@ -58,9 +63,11 @@ For each folder the user approved (or that doesn't exist yet):
 mkdir -p docs/sessions docs/decisions docs/research docs/plans
 ```
 
-### Step 4: Create WORK.md
+### Step 4: Create WORK.md (AI Context File)
 
 Only if it doesn't exist or user chose "Replace".
+
+WORK.md is the **AI-facing** structured state file. It uses a multi-track format so parallel workstreams don't clobber each other.
 
 Use this template:
 
@@ -69,20 +76,17 @@ Use this template:
 
 > Last updated: {YYYY-MM-DD}
 
-## Current Phase
-{Describe what phase the project is in}
+## Tracks
 
-## Just Done
-- {What was accomplished in the last session}
+### {Track Name}
+**Status**: Active | Paused | Blocked
+**Last session**: {date} — {link to session log}
+**State**: {Current state of this track — what's done, what's in progress}
+**Next**: {Specific next action for this track}
+**Key files**: {Files actively being worked on in this track}
 
-## Blocked / Open Questions
-- {Any blockers or questions that need answers}
-
-## Next Steps
-1. {What should happen next — first item matches "Next Session Starts With" from last session log}
-
-## Active Files
-- {Key files currently being worked on}
+## Open Questions
+- {Any blockers or questions that span tracks}
 
 ## Active Plan
 None
@@ -90,7 +94,29 @@ None
 
 Replace `{YYYY-MM-DD}` with today's date. Leave placeholder text for user to fill in.
 
-### Step 5: Configure .gitignore
+Ask the user: "What are your initial work tracks? (e.g., 'frontend', 'backend', 'infra') — or just one track is fine too."
+
+### Step 5: Create TODO.md (Human Scratchpad)
+
+Only if it doesn't exist or user chose "Replace".
+
+TODO.md is the **human-facing** freeform scratchpad. It is append-only — old entries are never deleted.
+
+Use this template:
+
+```markdown
+# TODO
+
+## Active Tracks
+- {emoji} {Track name} ({brief description})
+
+## {YYYY-MM-DD}
+- {What needs to happen today/next}
+```
+
+Replace `{YYYY-MM-DD}` with today's date. Keep it minimal — the user will fill this in their own style.
+
+### Step 6: Configure .gitignore
 
 For **each** of the four `docs/` subfolders, ask the user:
 
@@ -104,7 +130,7 @@ Present as multi-select:
 
 Append chosen entries to `.gitignore`. If `.gitignore` doesn't exist, create it.
 
-### Step 6: Legacy Migration (if applicable)
+### Step 7: Legacy Migration (if applicable)
 
 If `.claude/memory/session-logs/` exists and has files:
 
@@ -115,7 +141,7 @@ If yes:
 mv .claude/memory/session-logs/*.md docs/sessions/
 ```
 
-### Step 7: Confirm
+### Step 8: Confirm
 
 Print summary:
 
@@ -127,7 +153,8 @@ Workspace initialized:
   - docs/decisions/
   - docs/research/
   - docs/plans/
-  - WORK.md
+  - WORK.md (AI context — multi-track state)
+  - TODO.md (your scratchpad — freeform, append-only)
 
   .gitignore:
   - docs/sessions/ (ignored)
@@ -136,6 +163,11 @@ Workspace initialized:
   - Moved 3 files from .claude/memory/session-logs/ to docs/sessions/
 
 Ready to use /start and /end for session management.
+
+File guide:
+  TODO.md → Your notes. You own it. Claude appends, never deletes.
+  WORK.md → AI context. /end updates per-track, never overwrites other tracks.
+  docs/sessions/ → Rich session logs (immutable archive).
 ```
 
 ## Important
@@ -143,12 +175,12 @@ Ready to use /start and /end for session management.
 - This skill is **idempotent** — running `/init` twice should not break anything
 - Use `{cwd}` (from `pwd`) for all paths, never hardcode
 - If `.gitignore` already has an entry, don't duplicate it
-- The skill creates structure only — it does not populate content beyond the WORK.md template
+- The skill creates structure only — it does not populate content beyond templates
 
 ## Tools Usage
 
 - **Bash**: `mkdir -p`, `ls`, `mv`, `pwd`, `date`
-- **Write**: Create WORK.md, append to .gitignore
+- **Write**: Create WORK.md, TODO.md, append to .gitignore
 - **Read**: Check existing .gitignore content
 - **Glob**: Detect existing structure
-- **AskUserQuestion**: Smart merge decisions, .gitignore choices
+- **AskUserQuestion**: Smart merge decisions, .gitignore choices, track names

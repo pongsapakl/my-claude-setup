@@ -4,17 +4,45 @@
 
 Every working session follows this flow:
 
-1. **`/start`** — Read WORK.md + latest session log, validate handoff, present onboarding summary, ask what to focus on
+1. **`/start`** — Read WORK.md + TODO.md + latest session log, show track overview, ask which track to focus on
 2. **Work** — Normal development, research, planning, meetings
-3. **`/end`** — Scan conversation, write session log, update WORK.md, quality-test handoff
+3. **`/end`** — Scan conversation, write rich session log, merge-update active track in WORK.md, append to TODO.md
 
-## WORK.md as Live State
+## Three Files, Three Audiences
 
-`WORK.md` is the project's single source of truth for current status.
+| File | Audience | Style | Updated By |
+|------|----------|-------|------------|
+| `TODO.md` | **Human** | Freeform scratchpad, dated entries, strikethrough for done | User writes, `/end` appends (never deletes) |
+| `WORK.md` | **AI** | Structured multi-track state | `/end` merge-updates per track (never full-replaces) |
+| `docs/sessions/*.md` | **Both** | Rich narrative archive | `/end` creates (immutable once written) |
 
-- Updated at the end of every session by `/end`
-- Read at the start of every session by `/start`
-- References the active plan in `docs/plans/`
+## Multi-Track Work
+
+Projects often have parallel workstreams (frontend, backend, infra, marketing, etc.). The system supports this:
+
+- `WORK.md` has a `## Tracks` section with independent track blocks
+- `/start` shows all tracks and asks which to focus on
+- `/end` only updates the track(s) that were active — other tracks stay untouched
+- Each track has its own Status, State, Next, and Key Files
+
+This prevents the "last session wins" problem where one workstream overwrites another's state.
+
+## Track-Scoped Updates (Critical Rule)
+
+When `/end` updates WORK.md:
+- **Only modify the active track(s)** declared at `/start`
+- **Append to Open Questions** — add new, only remove those explicitly answered
+- **Never delete other tracks' state**
+- **Never replace the entire file**
+
+## TODO.md as Human Scratchpad
+
+TODO.md is the user's personal tracking file, designed for quick human scanning:
+- Dated entries as headers (`## YYYY-MM-DD`)
+- Strikethrough (`~~done item~~`) for completed work — never delete old entries
+- Raw thoughts, brainstorming, and ideas welcome
+- `/end` appends a new dated block but never modifies existing content
+- The user may also edit this file directly at any time
 
 ## "Next Session Starts With" — Quality Criteria
 
@@ -27,8 +55,27 @@ The "Next Session Starts With" field in session logs is the bridge between sessi
 3. **Self-contained** — a new session can act on it without reading the full log
 4. **Half-done aware** — if work is mid-stream, says exactly where it was left and what comes next
 
-**Bad**: "Continue working on the project"
-**Good**: "Wire up the Stripe webhook handler in `api/webhooks/stripe.ts` — the route exists but signature verification is stubbed out. Next: implement the `constructEvent` call using the webhook secret from env"
+## Session Log Richness
+
+Session logs should be **detailed and narrative**, not just checkboxes. They serve as the institutional memory of the project. A future session (or human) should be able to read a session log and understand:
+
+- What was tried and why
+- What worked and what didn't
+- What decisions were made and what alternatives were considered
+- What was surprising or took longer than expected
+- Technical details that would help someone pick up the work
+
+**When in doubt, include more detail rather than less.** A 200-line session log with rich narrative is more valuable than a 30-line checklist.
+
+## Mid-Session Documentation
+
+Don't wait for `/end` to capture decisions and research. When something significant happens during a session:
+
+- **Decision made?** → Proactively offer to write an ADR immediately while context is fresh
+- **Research spike done?** → Offer to save findings to `docs/research/` now
+- **Plan created?** → Save to `docs/plans/` now
+
+Context degrades over time (especially after `/compact`). Capturing artifacts mid-session preserves richer detail than reconstructing them at `/end`.
 
 ## When to Use Each Skill
 

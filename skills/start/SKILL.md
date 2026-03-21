@@ -1,6 +1,6 @@
 ---
 name: start
-description: Begin a work session — reads current state, validates handoff quality, presents onboarding summary. Auto-invokes on "/start", "start session".
+description: Begin a work session — reads current state, shows active tracks, validates handoff quality, presents onboarding summary. Auto-invokes on "/start", "start session".
 allowed-tools: [Read, Glob, Bash, AskUserQuestion]
 ---
 
@@ -19,103 +19,117 @@ Trigger when user says:
 
 ## How It Works
 
-### Step 1: Read WORK.md
+### Step 1: Read State Files
 
-Read `WORK.md` from the project root.
+Read these files from the project root:
+1. `WORK.md` — structured AI context (multi-track state)
+2. `TODO.md` — human scratchpad (if it exists)
 
 If `WORK.md` does not exist:
 - Say: "No WORK.md found. Run `/init` to set up the workspace first."
 - Stop here.
 
-### Step 2: Find Latest Session Log
+### Step 2: Find Latest Session Log(s)
 
 ```bash
-ls -t docs/sessions/ | head -1
+ls -t docs/sessions/ | head -5
 ```
 
-Read the most recent file. If `docs/sessions/` is empty or doesn't exist, note this as the first session.
+Read the most recent session log. If `docs/sessions/` is empty or doesn't exist, note this as the first session.
 
-### Step 3: Validate Handoff Quality
+### Step 3: Present Track Overview
 
-Check the session log's "Next Session Starts With" field against all four criteria:
+Show all tracks from WORK.md with their status:
+
+```
+**Your tracks:**
+  🔴 Frontend UI — last worked 2026-03-21 (active)
+  🟡 Eval Framework — last worked 2026-03-20 (active)
+  ⚪ Marketing — paused, waiting on DSP quality
+
+**Open questions:**
+  - [from WORK.md Open Questions section]
+
+**Active plan:** [from WORK.md Active Plan field, or "none"]
+```
+
+Use emoji to indicate status:
+- 🔴 Active (recently worked on)
+- 🟡 Active (not recently worked on)
+- ⚪ Paused or blocked
+- 🔵 New (just created)
+
+### Step 4: Show TODO.md Highlights
+
+If TODO.md exists, show the most recent date entry (just the last block, not the whole file):
+
+```
+**Your latest notes (from TODO.md):**
+  ## 2026-03-21
+  - audition 12 ref WAVs — do this before optimizer
+  - optimizer design: grid vs random vs bayesian?
+```
+
+This gives the user their own context back quickly.
+
+### Step 5: Show Last Session Details
+
+For the most recent session log, validate the "Next Session Starts With" field against all four criteria:
 
 1. **Starts with a verb** — "Run...", "Build...", "Test...", "Wire up..."
 2. **Names a specific thing** — file path, tool name, command, or concrete question
 3. **Is self-contained** — a new session reading only this line knows what to do
 4. **Captures half-done context** — if something was mid-task, says where it was left
 
-If any criterion fails, flag it — do not silently use a vague handoff.
-
-### Step 4: Present Onboarding Summary
-
-**If handoff is clean**, use this format:
-
+If the handoff is clean:
 ```
-**Phase:** [from WORK.md Current Phase]
-
-**Last session ([date from filename]):**
-- [2-4 bullets from session log Done section]
+**Last session ([date]):** [track name]
+  [2-4 bullets from Done section]
 
 **Resuming from:**
-"[paste Next Session Starts With from session log]"
-
-**Open questions / blockers:**
-- [from WORK.md Blocked / Open Questions, or "none"]
-
-**Active plan:**
-[from WORK.md Active Plan field, or "none"]
-
-**Other next steps:**
-1. [from WORK.md Next Steps, skip the first if already covered by Resuming from]
-2. ...
+  "[paste Next Session Starts With from session log]"
 ```
 
-**If handoff is incomplete** (missing or vague "Next Session Starts With"):
-
+If the handoff is incomplete (missing or vague):
 ```
 **Incomplete handoff detected**
-
-The last session log is missing a clear "Next Session Starts With" field.
-Falling back to WORK.md Next Steps — confirm these are still accurate before starting.
-
-**Phase:** [from WORK.md]
-**Next Steps:** [from WORK.md]
-**Open questions:** [from WORK.md]
-**Active plan:** [from WORK.md]
+  Last session log is missing a clear "Next Session Starts With" field.
+  Falling back to WORK.md track states.
 ```
 
-**If this is the first session** (no session logs):
-
+If this is the first session:
 ```
 **First session detected**
-
-No prior session logs found. Here is the current state from WORK.md:
-
-**Phase:** [from WORK.md]
-**Next Steps:** [from WORK.md]
-**Active plan:** [from WORK.md]
+  No prior session logs found. Starting fresh from WORK.md.
 ```
 
-### Step 5: Ask What to Focus On
+### Step 6: Ask What to Focus On
 
-Ask: "What would you like to focus on this session?"
+Ask: "Which track(s) are you working on this session?"
 
-If the handoff was clean, offer options:
-1. Resume from: "[Next Session Starts With summary]"
-2. [Other next steps from WORK.md]
+Present options based on tracks + last session handoff:
 
-If the handoff was incomplete, list WORK.md Next Steps and ask user to confirm which is still relevant.
+```
+1. Resume: "[Next Session Starts With summary]" (🔴 Frontend UI)
+2. 🟡 Eval Framework — audition refs, then build optimizer
+3. ⚪ Marketing — currently paused
+4. Start a new track
+```
+
+**Record the user's track selection** — this determines which track(s) `/end` will update later. Mention this: "Got it — I'll scope this session to [track name]. `/end` will only update that track in WORK.md."
 
 ## Important
 
 - This is a **read-only** skill — it never writes or modifies files
-- Keep the onboarding summary short — goal is fast context restoration in under 30 seconds of reading
+- Show the track overview first, then details — let the user orient quickly
+- Show TODO.md highlights to restore the user's own mental context
 - All paths are relative to the project root
-- If both WORK.md and session log disagree on state, prefer the session log (it's more recent and detailed)
+- If WORK.md and session log disagree on state, prefer the session log (more recent)
+- **Declare the active track(s)** — this scopes what `/end` will update
 
 ## Tools Usage
 
-- **Read**: Read WORK.md and session log files
+- **Read**: Read WORK.md, TODO.md, and session log files
 - **Glob**: Find session log files in docs/sessions/
 - **Bash**: List and sort session logs by date (`ls -t`)
-- **AskUserQuestion**: Ask what to focus on
+- **AskUserQuestion**: Ask which track(s) to work on

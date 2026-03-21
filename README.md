@@ -125,10 +125,11 @@ After installing, run `/init` in your project to set up the workspace:
 
 ```text
 your-project/
-├── WORK.md                  ← live state (what's happening now)
+├── TODO.md                  ← your scratchpad (human-facing, append-only)
+├── WORK.md                  ← AI context (multi-track state, merge-updated)
 ├── docs/
-│   ├── sessions/            ← session logs (written by /end)
-│   ├── decisions/           ← ADRs (written by any skill)
+│   ├── sessions/            ← rich session logs (written by /end)
+│   ├── decisions/           ← ADRs (written by any skill, anytime)
 │   ├── research/            ← research spikes (written by /research)
 │   └── plans/               ← implementation plans (written by /plan)
 └── CLAUDE.md                ← your project context (you write this)
@@ -142,11 +143,16 @@ These three skills form the core workflow. They keep context across sessions so 
 
 | Skill | When | What it does |
 |-------|------|-------------|
-| `/init` | Once per project | Creates `docs/` folders + `WORK.md` template, asks what to gitignore |
-| `/start` | Beginning of session | Reads `WORK.md` + latest session log, validates handoff, asks what to focus on |
-| `/end` | End of session | Writes session log, updates `WORK.md`, quality-tests the handoff note |
+| `/init` | Once per project | Creates `docs/` folders + `WORK.md` + `TODO.md`, asks about tracks and gitignore |
+| `/start` | Beginning of session | Shows track overview, reads `TODO.md` highlights + latest session log, asks which track to focus on |
+| `/end` | End of session | Writes rich narrative session log, merge-updates only the active track in `WORK.md`, appends to `TODO.md` |
 
-The key innovation is the **"Next Session Starts With"** field — a quality-gated handoff note that must be verb-starting, specific, self-contained, and half-done-aware. This means any new session (human or AI) can pick up exactly where the last one left off.
+**Key innovations in v0.6.0:**
+- **Multi-track WORK.md** — parallel workstreams (frontend, backend, etc.) don't overwrite each other. `/end` only updates the track you worked on.
+- **TODO.md scratchpad** — your freeform, append-only human-readable task tracker. Claude appends, never deletes.
+- **Rich narrative session logs** — detailed "What Happened" stories, not just checkboxes. Includes alternatives explored, technical details, and lessons learned.
+- **Default-write artifacts** — decisions and research docs are drafted by default at session end (opt-out, not opt-in).
+- **Mid-session documentation** — prompts to capture decisions and research immediately when they happen, not just at `/end`.
 
 ### Strategic — `/c-suite`, `/research`, `/plan`
 
@@ -182,8 +188,8 @@ The key innovation is the **"Next Session Starts With"** field — a quality-gat
 
 Plugin-level rules are loaded automatically when installed:
 
-- **docs-structure** — what each `docs/` folder is for, when to write ADRs
-- **session-workflow** — `/start` → `/end` lifecycle, handoff quality criteria
+- **docs-structure** — three-file architecture (TODO.md / WORK.md / session logs), when to write ADRs, mid-session documentation
+- **session-workflow** — multi-track `/start` → `/end` lifecycle, track-scoped updates, handoff quality criteria
 - **cli-workflow** — use CLI tools over MCP servers to save tokens
 - **discussion-protocol** — how C-Suite round-robin debates work
 - **git-commit-workflow** — commit conventions
