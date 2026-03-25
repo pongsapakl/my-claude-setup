@@ -2,12 +2,12 @@
 
 ## Project Overview
 
-**my-claude-team** is a Claude Code plugin that provides a multi-track session handover system and virtual C-suite advisory team. It solves the problem of ephemeral Claude Code sessions by persisting context across sessions via a three-file architecture: TODO.md (human scratchpad), WORK.md (AI context), and rich narrative session logs.
+**my-claude-setup** is a Claude Code plugin that provides a multi-track session handover system and virtual C-suite advisory team. It solves the problem of ephemeral Claude Code sessions by persisting context across sessions via a three-file architecture: TODO.md (human scratchpad), WORK.md (AI context), and rich narrative session logs.
 
 ## Project Structure
 
 ```
-my-claude-team/
+my-claude-setup/
 ├── agents/          # 8 agent definitions (CEO, CTO, CMO, CFO, Product Lead, Security Officer, Code Reviewer, License Officer)
 ├── skills/          # 8 skills: init, start, end, plan, research, c-suite-meeting, deployment-checker, infra-checker
 ├── rules/           # 6 plugin rules: docs-structure, session-workflow, cli-workflow, discussion-protocol, git-commit-workflow, security-standards
@@ -28,7 +28,7 @@ my-claude-team/
 
 ## Development Notes
 
-- Plugin is installed via: `/plugin marketplace add pongsapakl/my-claude-team`
+- Plugin is installed via: `/plugin marketplace add pongsapakl/my-claude-setup`
 - Skills are defined in `skills/<name>/SKILL.md` files
 - Agents are markdown files in `agents/`
 - Rules are markdown files in `rules/`

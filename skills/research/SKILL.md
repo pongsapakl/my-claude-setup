@@ -257,7 +257,7 @@ Example: "Should we pivot to web-only product?"
 ```python
 # Use Task tool once with multiple agent invocations
 Task(
-  subagent_type="my-claude-team:cto",
+  subagent_type="my-claude-setup:cto",
   prompt="{Research summary}\n\nProvide technical perspective on options A, B, C"
 )
 

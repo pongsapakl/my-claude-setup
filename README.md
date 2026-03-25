@@ -1,4 +1,4 @@
-# My Claude Team
+# My Claude Setup
 
 [Claude when you update readme please dont edit this part. This is handwritten (or handtyped) and I wanted to keep it as is. Below ## Quick Install you can do whatever you are born to do.]
 
@@ -11,8 +11,8 @@ This repo serves as my archive/backup for my workflow (integrated with Claude Co
 ## Quick Install
 
 ```bash
-/plugin marketplace add pongsapakl/my-claude-team
-/plugin install my-claude-team
+/plugin marketplace add pongsapakl/my-claude-setup
+/plugin install my-claude-setup
 ```
 
 ## What Problem Does This Solve?

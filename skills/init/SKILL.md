@@ -156,7 +156,7 @@ Files to copy:
 Each copied file must start with this comment block:
 
 ```markdown
-<!-- Installed by my-claude-team plugin.
+<!-- Installed by my-claude-setup plugin.
      Native plugin rules support is expected in Claude Code — once available,
      these files can be removed and rules will load automatically from the plugin. -->
 

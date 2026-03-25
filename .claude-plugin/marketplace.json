@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "my-claude-team",
+      "name": "my-claude-setup",
       "source": "./"
     }
   ]
