@@ -130,7 +130,45 @@ Present as multi-select:
 
 Append chosen entries to `.gitignore`. If `.gitignore` doesn't exist, create it.
 
-### Step 7: Legacy Migration (if applicable)
+### Step 7: Install Plugin Rules (Optional)
+
+Ask the user:
+
+"Install plugin rules to `.claude/rules/`? These provide session workflow, docs structure, git commit, security, and other conventions. (Yes / No)"
+
+**If Yes:**
+
+1. Create `.claude/rules/` if it doesn't exist:
+```bash
+mkdir -p .claude/rules
+```
+
+2. Copy each rule file from the plugin's `rules/` directory. For each file, prepend a deprecation header comment, then write to the target project:
+
+Files to copy:
+- `cli-workflow.md`
+- `discussion-protocol.md`
+- `docs-structure.md`
+- `git-commit-workflow.md`
+- `security-standards.md`
+- `session-workflow.md`
+
+Each copied file must start with this comment block:
+
+```markdown
+<!-- Installed by my-claude-team plugin.
+     Native plugin rules support is expected in Claude Code — once available,
+     these files can be removed and rules will load automatically from the plugin. -->
+
+```
+
+Then append the original rule content below it.
+
+Use `Read` to read each rule from the plugin directory, then `Write` to create the file in `.claude/rules/`.
+
+**If No:** Skip this step entirely.
+
+### Step 8: Legacy Migration (if applicable)
 
 If `.claude/memory/session-logs/` exists and has files:
 
@@ -141,7 +179,7 @@ If yes:
 mv .claude/memory/session-logs/*.md docs/sessions/
 ```
 
-### Step 8: Confirm
+### Step 9: Confirm
 
 Print summary:
 
@@ -158,6 +196,15 @@ Workspace initialized:
 
   .gitignore:
   - docs/sessions/ (ignored)
+
+  Rules (if installed):
+  - .claude/rules/cli-workflow.md
+  - .claude/rules/discussion-protocol.md
+  - .claude/rules/docs-structure.md
+  - .claude/rules/git-commit-workflow.md
+  - .claude/rules/security-standards.md
+  - .claude/rules/session-workflow.md
+  (Note: these can be removed once native plugin rules support lands)
 
   Migration:
   - Moved 3 files from .claude/memory/session-logs/ to docs/sessions/
